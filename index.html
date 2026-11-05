@@ -604,7 +604,11 @@ const Est = {
   async load() {
     if (Data.mode !== 'gas' || !Auth.session()) return;
     try { const j = await Data.call({ action: 'establishments', token: Data.token() }); this.set(j.data && j.data.rows); }
-    catch (e) { if (e.code === 'AUTH') this.clear(); console.warn('establishments', e); }
+    catch (e) {
+      if (e.code === 'AUTH') this.clear();
+      console.warn('establishments', e);
+      UI.toast('โหลดรายชื่อสถานที่ผลิตไม่สำเร็จ: ' + (e.code === 'UNKNOWN_ACTION' ? 'Code.gs บนเซิร์ฟเวอร์ยังเป็นเวอร์ชันเก่า (ต้อง Deploy เวอร์ชันใหม่)' : e.message), 'warn', 8000);
+    }
   }
 };
 /* ประเภทอาหาร (ตัวเลือกข้อ 2.4) — รายการคงที่ ไม่มีข้อมูลส่วนบุคคล */
@@ -1810,7 +1814,7 @@ function createFormUI(fd) {
         const dlId = 'dl_' + fd.id + '_' + f.name;
         ui.input.setAttribute('list', dlId);
         ctrl.append(h('datalist', { id: dlId, class: 'dl-est' }, ESTABLISHMENTS.map(e => h('option', { value: e.license, label: e.name }))));
-        ctrl.append(h('div', { class: 'help est-hint' + (Est.loaded ? ' hidden' : ''), text: 'เข้าสู่ระบบผู้ดูแลเพื่อเลือกเลขที่ใบอนุญาตและดึงข้อมูลสถานที่ผลิตจากฐานข้อมูล (หรือพิมพ์เองได้)' }));
+        ctrl = h('div', {}, ctrl, h('div', { class: 'help est-hint' + (Est.loaded ? ' hidden' : ''), text: 'เข้าสู่ระบบผู้ดูแลเพื่อเลือกเลขที่ใบอนุญาตและดึงข้อมูลสถานที่ผลิตจากฐานข้อมูล (หรือพิมพ์เองได้)' }));
       }
       /* ผู้ตรวจประเมิน — เลือกจากรายชื่อ หรือพิมพ์เองได้ */
       if (/^s1_1_auditor_name_\d$/.test(f.name) && ui.input) {
